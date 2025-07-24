@@ -79,7 +79,7 @@ function UserDetails() {
             <ListItemText primary="Dual Citizenship" />
             <Chip
               label={formData.hasDualCitizenship === "yes" ? "Yes" : "No"}
-              color={formData.hasDualCitizenship === "yes" ? "warning" : "success"}
+              color={formData.hasDualCitizenship === "yes" ? "success" : "warning"}
               size="small"
             />
           </ListItem>
@@ -92,7 +92,7 @@ function UserDetails() {
             <ListItemText primary="Foreign Affiliations" />
             <Chip
               label={formData.hasForeignAffiliations ? "Yes" : "No"}
-              color={formData.hasForeignAffiliations ? "error" : "success"}
+              color={formData.hasForeignAffiliations ? "success" : "error"}
               size="small"
             />
           </ListItem>
@@ -164,7 +164,7 @@ function UserDetails() {
             <ListItemText primary="Ever Arrested or Charged?" />
             <Chip
               label={formData.arrested === "yes" ? "Yes" : "No"}
-              color={formData.arrested === "yes" ? "warning" : "success"}
+              color={formData.arrested === "yes" ? "success" : "warning"}
               size="small"
             />
           </ListItem>
@@ -185,7 +185,7 @@ function UserDetails() {
             <ListItemText primary="Pending Cases?" />
             <Chip
               label={formData.pendingCase === "yes" ? "Yes" : "No"}
-              color={formData.pendingCase === "yes" ? "error" : "success"}
+              color={formData.pendingCase === "yes" ? "success" : "error"}
               size="small"
             />
           </ListItem>

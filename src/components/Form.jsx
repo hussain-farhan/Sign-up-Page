@@ -96,7 +96,6 @@ function Form() {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
     } else {
       console.log("Validation errors in current step:", validationErrors);
-      alert("Please fix the errors in the current section before proceeding.");
     }
   };
 

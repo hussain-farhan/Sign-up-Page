@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -8,11 +8,32 @@ import {
   FormHelperText,
 } from "@mui/material";
 
-function EducationHistory({ formData, updateFormData, errors }) {
+import eduvalidate from "../validation/EducationValidate";
+
+const EducationHistory = ({ formData, updateFormData, setParentErrors, submitted }) => {
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (submitted) {
+      const validationErrors = eduvalidate(formData);
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, educationHistory: validationErrors }));
+    } else {
+      setErrors({});
+      setParentErrors((prev) => ({ ...prev, educationHistory: {} }));
+    }
+  }, [formData, submitted]);
+  
   const handleEducationChange = (index, field, value) => {
     const updated = [...formData.educationHistory];
     updated[index][field] = value;
     updateFormData("educationHistory", updated);
+
+    if (submitted) {
+      const validationErrors = eduvalidate({ ...formData, educationHistory: updated });
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, educationHistory: validationErrors }));
+    }
   };
 
   const addEducation = () => {
@@ -20,12 +41,21 @@ function EducationHistory({ formData, updateFormData, errors }) {
       ...formData.educationHistory,
       { degree: "", institution: "", startDate: "", endDate: "" },
     ]);
+    setErrors((prev) => ({ ...prev, educationHistory: undefined }));
   };
 
   const removeEducation = (index) => {
     const updated = [...formData.educationHistory];
     updated.splice(index, 1);
     updateFormData("educationHistory", updated);
+
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      if (newErrors.educationHistory) {
+        newErrors.educationHistory.splice(index, 1);
+      }
+      return newErrors;
+    });
   };
 
   return (
@@ -37,6 +67,9 @@ function EducationHistory({ formData, updateFormData, errors }) {
       <Button variant="contained" color="secondary" onClick={addEducation}>
         Add Education
       </Button>
+      {submitted && errors.educationHistory && errors.educationHistory.general && (
+        <FormHelperText error>{errors.educationHistory.general}</FormHelperText>
+      )}
 
       {formData.educationHistory.map((edu, index) => (
         <Paper key={index} sx={{ p: 2, mt: 2 }} elevation={3}>
@@ -48,8 +81,8 @@ function EducationHistory({ formData, updateFormData, errors }) {
             }
             fullWidth
             margin="dense"
-            error={!!errors.educationHistory?.[index]?.degree}
-            helperText={errors.educationHistory?.[index]?.degree}
+            error={submitted && !!errors.educationHistory?.[index]?.degree}
+            helperText={submitted ? errors.educationHistory?.[index]?.degree : ''}
           />
 
           <TextField
@@ -60,8 +93,8 @@ function EducationHistory({ formData, updateFormData, errors }) {
             }
             fullWidth
             margin="dense"
-            error={!!errors.educationHistory?.[index]?.institution}
-            helperText={errors.educationHistory?.[index]?.institution}
+            error={submitted && !!errors.educationHistory?.[index]?.institution}
+            helperText={submitted ? errors.educationHistory?.[index]?.institution : ''}
           />
 
           <TextField
@@ -74,8 +107,8 @@ function EducationHistory({ formData, updateFormData, errors }) {
             fullWidth
             margin="dense"
             InputLabelProps={{ shrink: true }}
-            error={!!errors.educationHistory?.[index]?.startDate}
-            helperText={errors.educationHistory?.[index]?.startDate}
+            error={submitted && !!errors.educationHistory?.[index]?.startDate}
+            helperText={submitted ? errors.educationHistory?.[index]?.startDate : ''}
           />
 
           <TextField
@@ -88,13 +121,12 @@ function EducationHistory({ formData, updateFormData, errors }) {
             fullWidth
             margin="dense"
             InputLabelProps={{ shrink: true }}
-            error={!!errors.educationHistory?.[index]?.endDate}
-            helperText={errors.educationHistory?.[index]?.endDate}
+            error={submitted && !!errors.educationHistory?.[index]?.endDate}
+            helperText={submitted ? errors.educationHistory?.[index]?.endDate : ''}
           />
-
-          {errors.educationHistory?.[index]?.overlap && (
+          {submitted && errors.educationHistory?.[index]?.dateOverlap && (
             <FormHelperText error>
-              {errors.educationHistory[index].overlap}
+              {errors.educationHistory[index].dateOverlap}
             </FormHelperText>
           )}
 
@@ -109,15 +141,8 @@ function EducationHistory({ formData, updateFormData, errors }) {
           </Button>
         </Paper>
       ))}
-
-      {/* This error message displays if no education entries are added at all */}
-      {errors.educationHistory && !Array.isArray(errors.educationHistory) && (
-        <FormHelperText error>
-          {errors.educationHistory.degree}
-        </FormHelperText>
-      )}
     </Box>
   );
-}
+};
 
 export default EducationHistory;

@@ -1,29 +1,53 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
-  Checkbox,
-  FormControlLabel,
-  FormHelperText,
-  Paper,
   TextField,
   Typography,
+  Paper,
+  FormControlLabel,
+  Checkbox,
+  FormHelperText,
 } from "@mui/material";
 
-function EmploymentHistory({
-  formData,
-  updateFormData,
-  gapExplanations,
-  setGapExplanations,
-  errors,
-}) {
+import empvalidate from "../validation/EmploymentValidate"; 
+
+const EmploymentHistory = ({ formData, updateFormData, gapExplanations, setGapExplanations, setParentErrors, submitted }) => {
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (submitted) {
+      const validationErrors = empvalidate(
+        formData,
+        formData.employmentHistory,
+        gapExplanations
+      );
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, employmentHistory: validationErrors }));
+    } else {
+      setErrors({});
+      setParentErrors((prev) => ({ ...prev, employmentHistory: {} }));
+    }
+    // eslint-disable-next-line
+  }, [formData, gapExplanations, submitted]);
+
   const handleJobChange = (index, field, value) => {
     const updatedJobs = [...formData.employmentHistory];
     updatedJobs[index][field] = value;
     if (field === "currentlyWorking" && value) {
-      updatedJobs[index].endDate = ""; // Clear end date if currently working
+      updatedJobs[index].endDate = ""; 
     }
     updateFormData("employmentHistory", updatedJobs);
+
+    if (submitted) {
+      const validationErrors = empvalidate(
+        { ...formData, employmentHistory: updatedJobs },
+        updatedJobs,
+        gapExplanations
+      );
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, employmentHistory: validationErrors }));
+    }
   };
 
   const addJob = () => {
@@ -37,6 +61,7 @@ function EmploymentHistory({
         currentlyWorking: false,
       },
     ]);
+    setErrors((prev) => ({ ...prev, employmentHistory: undefined }));
   };
 
   const removeJob = (index) => {
@@ -44,9 +69,16 @@ function EmploymentHistory({
     updatedJobs.splice(index, 1);
     updateFormData("employmentHistory", updatedJobs);
 
-    // Also remove the corresponding gap explanation if it exists
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      if (newErrors.employmentHistory) {
+        newErrors.employmentHistory.splice(index, 1);
+      }
+      return newErrors;
+    });
+
     const newGapExplanations = { ...gapExplanations };
-    delete newGapExplanations[index];
+    delete newGapExplanations[index]; 
     setGapExplanations(newGapExplanations);
   };
 
@@ -59,6 +91,9 @@ function EmploymentHistory({
       <Button variant="contained" color="success" onClick={addJob}>
         Add Job
       </Button>
+      {submitted && errors.employmentHistory && errors.employmentHistory.general && (
+        <FormHelperText error>{errors.employmentHistory.general}</FormHelperText>
+      )}
 
       {formData.employmentHistory.map((job, index) => (
         <Paper key={index} sx={{ p: 2, mt: 2 }} elevation={3}>
@@ -70,20 +105,20 @@ function EmploymentHistory({
             }
             fullWidth
             margin="dense"
-            error={!!errors.employmentHistory?.[index]?.jobTitle}
-            helperText={errors.employmentHistory?.[index]?.jobTitle}
+            error={submitted && !!errors.employmentHistory?.[index]?.jobTitle}
+            helperText={submitted ? errors.employmentHistory?.[index]?.jobTitle : ''}
           />
-
           <TextField
             label="Employer"
             value={job.employer}
-            onChange={(e) => handleJobChange(index, "employer", e.target.value)}
+            onChange={(e) =>
+              handleJobChange(index, "employer", e.target.value)
+            }
             fullWidth
             margin="dense"
-            error={!!errors.employmentHistory?.[index]?.employer}
-            helperText={errors.employmentHistory?.[index]?.employer}
+            error={submitted && !!errors.employmentHistory?.[index]?.employer}
+            helperText={submitted ? errors.employmentHistory?.[index]?.employer : ''}
           />
-
           <TextField
             label="Start Date"
             type="date"
@@ -94,10 +129,9 @@ function EmploymentHistory({
             fullWidth
             margin="dense"
             InputLabelProps={{ shrink: true }}
-            error={!!errors.employmentHistory?.[index]?.startDate}
-            helperText={errors.employmentHistory?.[index]?.startDate}
+            error={submitted && !!errors.employmentHistory?.[index]?.startDate}
+            helperText={submitted ? errors.employmentHistory?.[index]?.startDate : ''}
           />
-
           <FormControlLabel
             control={
               <Checkbox
@@ -109,7 +143,6 @@ function EmploymentHistory({
             }
             label="Currently Working"
           />
-
           {!job.currentlyWorking && (
             <TextField
               label="End Date"
@@ -121,18 +154,16 @@ function EmploymentHistory({
               fullWidth
               margin="dense"
               InputLabelProps={{ shrink: true }}
-              error={!!errors.employmentHistory?.[index]?.endDate}
-              helperText={errors.employmentHistory?.[index]?.endDate}
+              error={submitted && !!errors.employmentHistory?.[index]?.endDate}
+              helperText={submitted ? errors.employmentHistory?.[index]?.endDate : ''}
             />
           )}
-
-          {errors.employmentHistory?.[index]?.overlap && (
+          {submitted && errors.employmentHistory?.[index]?.overlap && (
             <FormHelperText error>
               {errors.employmentHistory[index].overlap}
             </FormHelperText>
           )}
-
-          {errors.gapExplanations?.[index] && (
+          {submitted && errors.gapExplanations?.[index] && (
             <TextField
               label="Gap Explanation"
               multiline
@@ -150,7 +181,6 @@ function EmploymentHistory({
               margin="dense"
             />
           )}
-
           <Button
             color="error"
             variant="text"
@@ -164,6 +194,6 @@ function EmploymentHistory({
       ))}
     </Box>
   );
-}
+};
 
 export default EmploymentHistory;

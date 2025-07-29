@@ -28,7 +28,7 @@ function UserDetails() {
           minHeight: '80vh',
           p: 3,
           textAlign: 'center',
-          bgcolor: 'background.paper',
+          bgcolor: '#ffffff',
         }}
       >
         <Paper elevation={4} sx={{ p: 4, borderRadius: 2, maxWidth: 500 }}>
@@ -57,14 +57,15 @@ function UserDetails() {
   };
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 900, margin: 'auto', bgcolor: 'background.default', minHeight: '100vh' }}>
-      <Typography variant="h3" gutterBottom align="center" sx={{ mb: 4, fontWeight: 600, color: 'primary.dark' }}>
+
+    <Box sx={{ p: { xs: 2, md: 4 }, maxWidth: 900, margin: 'auto', bgcolor: '#f0f2f5', minHeight: '100vh' }}>
+      <Typography variant="h3" gutterBottom align="center" sx={{ mb: 4, fontWeight: 600, color: '#1565c0' }}>
         User Details Summary
       </Typography>
 
       {/* Personal Info */}
-      <Paper sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2 }} elevation={4}>
-        <Typography variant="h5" sx={{ color: 'primary.main', mb: 2 }}>Personal Information</Typography>
+      <Paper elevation={4} sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2, bgcolor: '#ffffff', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)' }} >
+  <Typography variant="h5" sx={{ color: '#1976d2', mb: 2 }}>Personal Information</Typography>
         <List disablePadding>
           <ListItem disableGutters>
             <ListItemText primary="Name" secondary={`${formData.firstname || 'N/A'} ${formData.lastname || 'N/A'}`} />
@@ -102,8 +103,8 @@ function UserDetails() {
       <Divider sx={{ my: 3 }} />
 
       {/* Employment */}
-      <Paper sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2 }} elevation={4}>
-        <Typography variant="h5" sx={{ color: 'primary.main', mb: 2 }}>Employment History</Typography>
+      <Paper sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2, elevation:  4, bgcolor: '#ffffff', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)' }}>
+        <Typography variant="h5" sx={{ color: '#1976d2', mb: 2 }}>Employment History</Typography>
         {formData.employmentHistory?.length > 0 ? (
           formData.employmentHistory.map((job, index) => (
             <Box key={index} sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: '8px' }}>
@@ -121,8 +122,8 @@ function UserDetails() {
       <Divider sx={{ my: 3 }} />
 
       {/* Education */}
-      <Paper sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2 }} elevation={4}>
-        <Typography variant="h5" sx={{ color: 'primary.main', mb: 2 }}>Education History</Typography>
+      <Paper sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2, elevation: 4, bgcolor: '#ffffff', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)' }}>
+        <Typography variant="h5" sx={{ color: '#1976d2', mb: 2 }}>Education History</Typography>
         {formData.educationHistory?.length > 0 ? (
           formData.educationHistory.map((edu, index) => (
             <Box key={index} sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: '8px' }}>
@@ -140,8 +141,8 @@ function UserDetails() {
       <Divider sx={{ my: 3 }} />
 
       {/* Family */}
-      <Paper sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2 }} elevation={4}>
-        <Typography variant="h5" sx={{ color: 'primary.main', mb: 2 }}>Family Members</Typography>
+      <Paper sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2, elevation: 4 , bgcolor: '#ffffff', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)' }}>
+        <Typography variant="h5" sx={{ color: '#1976d2', mb: 2 }}>Family Members</Typography>
         {formData.familyMembers?.length > 0 ? (
           formData.familyMembers.map((member, index) => (
             <Box key={index} sx={{ mb: 3, p: 2, border: '1px solid #e0e0e0', borderRadius: '8px' }}>
@@ -157,8 +158,8 @@ function UserDetails() {
       <Divider sx={{ my: 3 }} />
 
       {/* Criminal History */}
-      <Paper sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2 }} elevation={4}>
-        <Typography variant="h5" sx={{ color: 'primary.main', mb: 2 }}>Criminal History</Typography>
+      <Paper sx={{ p: { xs: 2, md: 4 }, mb: 4, borderRadius: 2, elevation: 4 , bgcolor: '#ffffff', boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)' }}>
+        <Typography variant="h5" sx={{ color: '#1976d2', mb: 2 }}>Criminal History</Typography>
         <List disablePadding>
           <ListItem disableGutters>
             <ListItemText primary="Ever Arrested or Charged?" />
@@ -194,7 +195,14 @@ function UserDetails() {
 
       {/* Button */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 4 }}>
-        <Button variant="contained" color="primary" onClick={() => navigate('/')} size="large">
+        <Button variant="contained"  sx={{
+            bgcolor: '#1976d2', 
+            '&:hover': {
+              bgcolor: '#1565c0', 
+            },
+            textTransform: 'none', 
+          }}
+          onClick={() => navigate('/')} size="large">
           Go Back to Form
         </Button>
       </Box>

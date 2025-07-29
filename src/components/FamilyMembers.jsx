@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -12,7 +12,22 @@ import {
   FormHelperText,
 } from "@mui/material";
 
-function FamilyMembers({ formData, updateFormData, errors }) {
+import famvalidate from "../validation/FamilyValidate";
+
+const FamilyMembers = ({ formData, updateFormData, setParentErrors, submitted }) => {
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (submitted) {
+      const validationErrors = famvalidate(formData);
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, familyMembers: validationErrors }));
+    } else {
+      setErrors({});
+      setParentErrors((prev) => ({ ...prev, familyMembers: {} }));
+    }
+  }, [formData, submitted]);
+
   const handleFamilyChange = (index, field, value) => {
     const updated = [...formData.familyMembers];
     updated[index] = {
@@ -23,13 +38,19 @@ function FamilyMembers({ formData, updateFormData, errors }) {
     const hasForeignAffiliations = updated.some(
       (member) =>
         member.country &&
-        formData.citizenship && 
+        formData.citizenship &&
         member.country.trim().toLowerCase() !==
           formData.citizenship.trim().toLowerCase()
     );
 
     updateFormData("familyMembers", updated);
     updateFormData("hasForeignAffiliations", hasForeignAffiliations);
+
+    if (submitted) {
+      const validationErrors = famvalidate({ ...formData, familyMembers: updated });
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, familyMembers: validationErrors }));
+    }
   };
 
   const addFamilyMember = () => {
@@ -37,6 +58,7 @@ function FamilyMembers({ formData, updateFormData, errors }) {
       ...formData.familyMembers,
       { fullName: "", relationship: "", country: "" },
     ]);
+    setErrors((prev) => ({ ...prev, familyMembers: undefined }));
   };
 
   const removeFamilyMember = (index) => {
@@ -53,6 +75,14 @@ function FamilyMembers({ formData, updateFormData, errors }) {
 
     updateFormData("familyMembers", updated);
     updateFormData("hasForeignAffiliations", hasForeignAffiliations);
+
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      if (newErrors.familyMembers) {
+        newErrors.familyMembers.splice(index, 1);
+      }
+      return newErrors;
+    });
   };
 
   return (
@@ -64,6 +94,9 @@ function FamilyMembers({ formData, updateFormData, errors }) {
       <Button variant="contained" color="secondary" onClick={addFamilyMember}>
         Add Family Member
       </Button>
+      {submitted && errors.familyMembers && errors.familyMembers.general && (
+        <FormHelperText error>{errors.familyMembers.general}</FormHelperText>
+      )}
 
       {formData.familyMembers.map((member, index) => (
         <Paper key={index} sx={{ p: 2, mt: 2 }} elevation={2}>
@@ -75,14 +108,14 @@ function FamilyMembers({ formData, updateFormData, errors }) {
             }
             fullWidth
             margin="dense"
-            error={!!errors.familyMembers?.[index]?.fullName}
-            helperText={errors.familyMembers?.[index]?.fullName}
+            error={submitted && !!errors.familyMembers?.[index]?.fullName}
+            helperText={submitted ? errors.familyMembers?.[index]?.fullName : ''}
           />
 
           <FormControl
             fullWidth
             margin="dense"
-            error={!!errors.familyMembers?.[index]?.relationship}
+            error={submitted && !!errors.familyMembers?.[index]?.relationship}
           >
             <InputLabel>Relationship</InputLabel>
             <Select
@@ -95,8 +128,9 @@ function FamilyMembers({ formData, updateFormData, errors }) {
               <MenuItem value="Parent">Parent</MenuItem>
               <MenuItem value="Sibling">Sibling</MenuItem>
               <MenuItem value="Spouse">Spouse</MenuItem>
+              {/* Add other relationships as needed */}
             </Select>
-            {errors.familyMembers?.[index]?.relationship && (
+            {submitted && errors.familyMembers?.[index]?.relationship && (
               <FormHelperText>
                 {errors.familyMembers[index].relationship}
               </FormHelperText>
@@ -111,8 +145,8 @@ function FamilyMembers({ formData, updateFormData, errors }) {
             }
             fullWidth
             margin="dense"
-            error={!!errors.familyMembers?.[index]?.country}
-            helperText={errors.familyMembers?.[index]?.country}
+            error={submitted && !!errors.familyMembers?.[index]?.country}
+            helperText={submitted ? errors.familyMembers?.[index]?.country : ''}
           />
 
           <Button
@@ -135,6 +169,6 @@ function FamilyMembers({ formData, updateFormData, errors }) {
       </Box>
     </Box>
   );
-}
+};
 
 export default FamilyMembers;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; 
 import {
   Box,
   Button,
@@ -16,11 +16,18 @@ import EducationHistory from "./EducationHistory";
 import FamilyMembers from "./FamilyMembers";
 import CriminalHistory from "./CriminalHistory";
 
-import validateForm from "../validation/validateForm";
+// Import validation functions
+import validateinfo from "../validation/PersonalValidate";
+import empvalidate from "../validation/EmploymentValidate";
+import eduvalidate from "../validation/EducationValidate";
+import famvalidate from "../validation/FamilyValidate";
+import crimiValidate from "../validation/CriminalValidate";
+
 
 function Form() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const [activeStep, setActiveStep] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
   const steps = [
     "Personal Information",
     "Employment History",
@@ -45,8 +52,8 @@ function Form() {
     pendingCase: "no",
   });
 
-  const [errors, setErrors] = useState({});
   const [gapExplanations, setGapExplanations] = useState({});
+  const [parentErrors, setParentErrors] = useState({});
 
   const updateFormData = (field, value) => {
     setFormData((prev) => ({
@@ -55,123 +62,121 @@ function Form() {
     }));
   };
 
-  const handleNext = () => {
-  
-    const validationErrors = validateForm(formData, gapExplanations);
-    setErrors(validationErrors);
-
-    let currentStepHasErrors = false;
-    switch (activeStep) {
-      case 0: 
-        if (validationErrors.firstname || validationErrors.lastname || validationErrors.dateOfBirth || validationErrors.citizenship || validationErrors.secondCitizenship) {
-          currentStepHasErrors = true;
-        }
-        break;
-      case 1: 
-        if (validationErrors.employmentHistory || validationErrors.gapExplanations) {
-          currentStepHasErrors = true;
-        }
-        break;
-      case 2: 
-        if (validationErrors.educationHistory) {
-          currentStepHasErrors = true;
-        }
-        break;
-      case 3: 
-        if (validationErrors.familyMembers) {
-          currentStepHasErrors = true;
-        }
-        break;
-      case 4: 
-        if (validationErrors.arrested || validationErrors.arrestDetails || validationErrors.pendingCase) {
-          currentStepHasErrors = true;
-        }
-        break;
+  const isStepValid = (stepIndex) => {
+    let errors = {};
+    switch (stepIndex) {
+      case "Personal Information":
+        errors = validateinfo(formData);
+        setParentErrors((prev) => ({ ...prev, personalInfo: errors }));
+        return Object.keys(errors).length === 0;
+      case "Employment History":
+        errors = empvalidate(formData, formData.employmentHistory, gapExplanations);
+        setParentErrors((prev) => ({ ...prev, employmentHistory: errors }));
+        return Object.keys(errors).length === 0;
+      case "Education History":
+        errors = eduvalidate(formData);
+        setParentErrors((prev) => ({ ...prev, educationHistory: errors }));
+        return Object.keys(errors).length === 0;
+      case "Family Members":
+        errors = famvalidate(formData);
+        setParentErrors((prev) => ({ ...prev, familyMembers: errors }));
+        return Object.keys(errors).length === 0;
+      case "Criminal History":
+        errors = crimiValidate(formData);
+        setParentErrors((prev) => ({ ...prev, criminalHistory: errors }));
+        return Object.keys(errors).length === 0;
       default:
-        break;
+        console.error("Unknown step index:");
+        return true;
     }
+  };
 
-
-    if (!currentStepHasErrors) {
+  const handleNext = () => {
+    setSubmitted(true);
+    if (isStepValid(steps[activeStep])) {
       setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    } else {
-      console.log("Validation errors in current step:", validationErrors);
+      setSubmitted(false); 
+      console.log(`Validation failed for step ${activeStep}. Please correct the errors.`);
     }
   };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    setSubmitted(false);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const validationErrors = validateForm(formData, gapExplanations);
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length === 0) {
-      console.log("Form submitted successfully:", formData);
-      navigate("/user-details", { state: { formData } });
+    setSubmitted(true);
+    if (isStepValid(steps[activeStep])) {
+      const allStepsValid = steps.every((label) => isStepValid(label));
+      if (allStepsValid) {
+        console.log("Form submitted successfully:", formData);
+        navigate("/user-details", { state: { formData } });
+      } else {
+        console.log("Overall form validation failed. Please review all steps.");
+        const firstInvalidStep = steps.findIndex((label) => !isStepValid(label));
+        if (firstInvalidStep !== -1) {
+          setActiveStep(firstInvalidStep);
+        }
+      }
     } else {
-      console.log("Form validation errors:", validationErrors);
-      if (validationErrors.pendingCase) {
-        alert("Form submission blocked: " + validationErrors.pendingCase);
-      }
-      
-      const firstErrorStep = Object.keys(validationErrors).some(key => ["firstname", "lastname", "dateOfBirth", "citizenship", "secondCitizenship"].includes(key)) ? 0 :
-                             Object.keys(validationErrors).some(key => ["employmentHistory", "gapExplanations"].includes(key)) ? 1 :
-                             Object.keys(validationErrors).some(key => ["educationHistory"].includes(key)) ? 2 :
-                             Object.keys(validationErrors).some(key => ["familyMembers"].includes(key)) ? 3 :
-                             Object.keys(validationErrors).some(key => ["arrested", "arrestDetails", "pendingCase"].includes(key)) ? 4 :
-                             null;
-      if (firstErrorStep !== null && activeStep !== firstErrorStep) {
-          setActiveStep(firstErrorStep);
-          alert("Please review the errors in the form.");
-      }
+      console.log("Validation failed for the current (last) step. Please correct errors.");
     }
   };
 
   const getStepContent = (step) => {
     switch (step) {
-      case 0:
+      case "Personal Information":
         return (
           <PersonalInfo
             formData={formData}
             updateFormData={updateFormData}
-            errors={errors}
+            setParentErrors={setParentErrors}
+            parentErrors={parentErrors.personalInfo}
+            submitted={submitted}
           />
         );
-      case 1:
+      case "Employment History":
         return (
           <EmploymentHistory
             formData={formData}
             updateFormData={updateFormData}
             gapExplanations={gapExplanations}
             setGapExplanations={setGapExplanations}
-            errors={errors}
+            setParentErrors={setParentErrors}
+            parentErrors={parentErrors.employmentHistory}
+            submitted={submitted}
           />
         );
-      case 2:
+      case "Education History":
         return (
           <EducationHistory
             formData={formData}
             updateFormData={updateFormData}
-            errors={errors}
+            setParentErrors={setParentErrors}
+            parentErrors={parentErrors.educationHistory}
+             submitted={submitted}
           />
         );
-      case 3:
+      case "Family Members":
         return (
           <FamilyMembers
             formData={formData}
             updateFormData={updateFormData}
-            errors={errors}
+            setParentErrors={setParentErrors}
+            parentErrors={parentErrors.familyMembers}
+             submitted={submitted}
           />
         );
-      case 4:
+      case "Criminal History":
         return (
           <CriminalHistory
             formData={formData}
             updateFormData={updateFormData}
-            errors={errors}
+            setParentErrors={setParentErrors}
+            parentErrors={parentErrors.criminalHistory}
+             submitted={submitted}
           />
         );
       default:
@@ -179,13 +184,56 @@ function Form() {
     }
   };
 
+  const stepperStyles = {
+    mb: 4,
+    "& .MuiStepLabel-active": {
+      "& .MuiStepLabel-label": {
+        color: "#1976d2",
+      },
+      "& .MuiStepIcon-root": {
+        color: "#1976d2",
+      },
+    },
+    "& .MuiStepLabel-completed": {
+      "& .MuiStepLabel-label": {
+        color: "#555555",
+      },
+      "& .MuiStepIcon-root": {
+        color: "#1976d2",
+      },
+    },
+    "& .MuiStepLabel-label": {
+      color: "#333333",
+    },
+    "& .MuiStepIcon-root": {
+      color: "#b0b0b0",
+    },
+  };
+
+  const paperStyles = {
+    p: 3,
+    mb: 4,
+    borderRadius: 2,
+    bgcolor: "#ffffff",
+    boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.05)",
+  };
+
+  const buttonStyles = {
+    bgcolor: "#1976d2",
+    "&:hover": {
+      bgcolor: "#1565c0",
+    },
+    textTransform: "none",
+  };
+
   return (
-    <Box sx={{ p: 3, maxWidth: 800, margin: "auto" }}>
-      <Typography variant="h4" gutterBottom align="center" sx={{ mb: 4 }}>
+    <Box sx={{ p: 3, maxWidth: 800, mx: "auto", bgcolor: "#f0f2f5" }}>
+      <Typography variant="h4" align="center" gutterBottom sx={{ mb: 4, color: "#1976d2" }}>
         Application Form
       </Typography>
 
-      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 4 }}>
+      {/* Stepper */}
+      <Stepper activeStep={activeStep} alternativeLabel sx={stepperStyles}>
         {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
@@ -193,23 +241,24 @@ function Form() {
         ))}
       </Stepper>
 
-      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-        {getStepContent(activeStep)}
+      {/* Step Content */}
+      <Paper elevation={3} sx={paperStyles}>
+        {getStepContent(steps[activeStep])}
       </Paper>
 
+      {/* Navigation Buttons */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
         <Button disabled={activeStep === 0} onClick={handleBack} variant="outlined">
           Back
         </Button>
-        {activeStep === steps.length - 1 ? (
-          <Button type="submit" variant="contained" color="primary" onClick={handleSubmit}>
-            Submit Application
-          </Button>
-        ) : (
-          <Button variant="contained" color="primary" onClick={handleNext}>
-            Next
-          </Button>
-        )}
+
+        <Button
+          variant="contained"
+          onClick={activeStep === steps.length - 1 ? handleSubmit : handleNext}
+          sx={buttonStyles}
+        >
+          {activeStep === steps.length - 1 ? "Submit Application" : "Next"}
+        </Button>
       </Box>
     </Box>
   );

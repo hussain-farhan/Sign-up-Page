@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -12,16 +12,41 @@ import {
   Typography,
 } from "@mui/material";
 
-function CriminalHistory({ formData, updateFormData, errors }) {
+import crimiValidate from "../validation/CriminalValidate";
+
+const CriminalHistory = ({ formData, updateFormData, setParentErrors, submitted }) => {
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (submitted) {
+      const validationErrors = crimiValidate(formData);
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, criminalHistory: validationErrors }));
+    } else {
+      setErrors({});
+      setParentErrors((prev) => ({ ...prev, criminalHistory: {} }));
+    }
+  }, [formData, submitted]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     updateFormData(name, value);
+    if (submitted) {
+      const validationErrors = crimiValidate({ ...formData, [name]: value });
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, criminalHistory: validationErrors }));
+    }
   };
 
   const handleArrestDetailChange = (index, field, value) => {
     const updatedDetails = [...formData.arrestDetails];
     updatedDetails[index][field] = value;
     updateFormData("arrestDetails", updatedDetails);
+    if (submitted) {
+      const validationErrors = crimiValidate({ ...formData, arrestDetails: updatedDetails });
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, criminalHistory: validationErrors }));
+    }
   };
 
   const addArrestDetail = () => {
@@ -29,12 +54,21 @@ function CriminalHistory({ formData, updateFormData, errors }) {
       ...formData.arrestDetails,
       { description: "", date: "" },
     ]);
+    setErrors((prev) => ({ ...prev, arrestDetails: undefined }));
   };
 
   const removeArrestDetail = (index) => {
     const updatedDetails = [...formData.arrestDetails];
     updatedDetails.splice(index, 1);
     updateFormData("arrestDetails", updatedDetails);
+
+    setErrors((prev) => {
+      const newErrors = { ...prev };
+      if (newErrors.arrestDetails) {
+        newErrors.arrestDetails.splice(index, 1);
+      }
+      return newErrors;
+    });
   };
 
   return (
@@ -43,9 +77,10 @@ function CriminalHistory({ formData, updateFormData, errors }) {
         Criminal History
       </Typography>
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Have you ever been arrested?</InputLabel>
+      <FormControl fullWidth margin="normal" error={submitted && !!errors.arrested}>
+        <InputLabel id="arrested-label">Have you ever been arrested?</InputLabel>
         <Select
+          labelId="arrested-label"
           name="arrested"
           value={formData.arrested}
           onChange={handleChange}
@@ -54,6 +89,9 @@ function CriminalHistory({ formData, updateFormData, errors }) {
           <MenuItem value="no">No</MenuItem>
           <MenuItem value="yes">Yes</MenuItem>
         </Select>
+        {submitted && errors.arrested && (
+          <FormHelperText>{errors.arrested}</FormHelperText>
+        )}
       </FormControl>
 
       {formData.arrested === "yes" && (
@@ -66,6 +104,10 @@ function CriminalHistory({ formData, updateFormData, errors }) {
           >
             Add Arrest Incident
           </Button>
+          {submitted && errors.arrestDetails && errors.arrestDetails.general && (
+            <FormHelperText error>{errors.arrestDetails.general}</FormHelperText>
+          )}
+
           {formData.arrestDetails.map((incident, index) => (
             <Paper key={index} sx={{ p: 2, mt: 2 }} elevation={2}>
               <TextField
@@ -78,8 +120,8 @@ function CriminalHistory({ formData, updateFormData, errors }) {
                 margin="dense"
                 multiline
                 rows={2}
-                error={!!errors.arrestDetails?.[index]?.description}
-                helperText={errors.arrestDetails?.[index]?.description}
+                error={submitted && !!errors.arrestDetails?.[index]?.description}
+                helperText={submitted ? errors.arrestDetails?.[index]?.description : ''}
               />
               <TextField
                 label="Date of Incident"
@@ -90,10 +132,11 @@ function CriminalHistory({ formData, updateFormData, errors }) {
                 }
                 fullWidth
                 margin="dense"
-                error={!!errors.arrestDetails?.[index]?.date}
-                helperText={errors.arrestDetails?.[index]?.date}
+                InputLabelProps={{ shrink: true }}
+                error={submitted && !!errors.arrestDetails?.[index]?.date}
+                helperText={submitted ? errors.arrestDetails?.[index]?.date : ''}
               />
-              {errors.arrestDetails?.[index]?.overlap && (
+              {submitted && errors.arrestDetails?.[index]?.overlap && (
                 <FormHelperText error>
                   {errors.arrestDetails[index].overlap}
                 </FormHelperText>
@@ -112,9 +155,10 @@ function CriminalHistory({ formData, updateFormData, errors }) {
         </Box>
       )}
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Are any cases still pending?</InputLabel>
+      <FormControl fullWidth margin="normal" error={submitted && !!errors.pendingCase}>
+        <InputLabel id="pending-case-label">Are any cases still pending?</InputLabel>
         <Select
+          labelId="pending-case-label"
           name="pendingCase"
           value={formData.pendingCase}
           onChange={handleChange}
@@ -123,12 +167,12 @@ function CriminalHistory({ formData, updateFormData, errors }) {
           <MenuItem value="no">No</MenuItem>
           <MenuItem value="yes">Yes</MenuItem>
         </Select>
-        {errors.pendingCase && (
-          <FormHelperText error>{errors.pendingCase}</FormHelperText>
+        {submitted && errors.pendingCase && (
+          <FormHelperText>{errors.pendingCase}</FormHelperText>
         )}
       </FormControl>
     </Box>
   );
-}
+};
 
 export default CriminalHistory;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   FormControl,
@@ -7,12 +7,34 @@ import {
   Select,
   TextField,
   Typography,
+  FormHelperText, 
 } from "@mui/material";
 
-function PersonalInfo({ formData, updateFormData, errors }) {
+import personalValidate from "../validation/PersonalValidate";
+
+const PersonalInfo = ({ formData, updateFormData, setParentErrors, submitted }) => {
+  const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    if (submitted) {
+      const validationErrors = personalValidate(formData);
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, personalInfo: validationErrors }));
+    } else {
+      setErrors({});
+      setParentErrors((prev) => ({ ...prev, personalInfo: {} }));
+    }
+  }, [formData, submitted]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     updateFormData(name, value);
+    
+    if (submitted) {
+      const validationErrors = personalValidate({ ...formData, [name]: value });
+      setErrors(validationErrors);
+      setParentErrors((prev) => ({ ...prev, personalInfo: validationErrors }));
+    }
   };
 
   return (
@@ -28,8 +50,8 @@ function PersonalInfo({ formData, updateFormData, errors }) {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        error={!!errors.firstname}
-        helperText={errors.firstname}
+        error={submitted && !!errors.firstname}
+        helperText={submitted ? errors.firstname : ''}
       />
 
       <TextField
@@ -39,8 +61,8 @@ function PersonalInfo({ formData, updateFormData, errors }) {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        error={!!errors.lastname}
-        helperText={errors.lastname}
+        error={submitted && !!errors.lastname}
+        helperText={submitted ? errors.lastname : ''}
       />
 
       <TextField
@@ -52,8 +74,8 @@ function PersonalInfo({ formData, updateFormData, errors }) {
         fullWidth
         margin="normal"
         InputLabelProps={{ shrink: true }}
-        error={!!errors.dateOfBirth}
-        helperText={errors.dateOfBirth}
+        error={submitted && !!errors.dateOfBirth}
+        helperText={submitted ? errors.dateOfBirth : ''}
       />
 
       <TextField
@@ -63,13 +85,14 @@ function PersonalInfo({ formData, updateFormData, errors }) {
         onChange={handleChange}
         fullWidth
         margin="normal"
-        error={!!errors.citizenship}
-        helperText={errors.citizenship}
+        error={submitted && !!errors.citizenship}
+        helperText={submitted ? errors.citizenship : ''}
       />
 
-      <FormControl fullWidth margin="normal">
-        <InputLabel>Dual Citizenship</InputLabel>
+      <FormControl fullWidth margin="normal" error={submitted && !!errors.hasDualCitizenship}>
+        <InputLabel id="hasDualCitizenship-label">Dual Citizenship</InputLabel>
         <Select
+          labelId="hasDualCitizenship-label"
           name="hasDualCitizenship"
           value={formData.hasDualCitizenship}
           onChange={handleChange}
@@ -78,6 +101,9 @@ function PersonalInfo({ formData, updateFormData, errors }) {
           <MenuItem value="no">No</MenuItem>
           <MenuItem value="yes">Yes</MenuItem>
         </Select>
+        {submitted && errors.hasDualCitizenship && (
+          <FormHelperText>{errors.hasDualCitizenship}</FormHelperText>
+        )}
       </FormControl>
 
       {formData.hasDualCitizenship === "yes" && (
@@ -88,12 +114,12 @@ function PersonalInfo({ formData, updateFormData, errors }) {
           onChange={handleChange}
           fullWidth
           margin="normal"
-          error={!!errors.secondCitizenship}
-          helperText={errors.secondCitizenship}
+          error={submitted && !!errors.secondCitizenship}
+          helperText={submitted ? errors.secondCitizenship : ''}
         />
       )}
     </Box>
   );
-}
+};
 
 export default PersonalInfo;

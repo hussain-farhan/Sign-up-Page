@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Form from "./components/Form"; // Assuming Form.js is in the same directory
-import UserDetails from "./components/UserDetails"; // New component for displaying details
+import Form from "./components/Form"; 
+import UserDetails from "./components/UserDetails"; 
 
 function App() {
   return (

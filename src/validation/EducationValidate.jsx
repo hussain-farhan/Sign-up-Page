@@ -1,6 +1,16 @@
 const eduvalidate = (formData) => {
   const newErrors = {};
+  // var test1 = TRUE;
+  // var abc2  = 123;
+  // var ab3 = 1;
+  // var ch4 ='sss';
+  // var arr5 = [];
 
+  // let ch ='sss';
+  // let test = TRUE;
+  // let abc  = 123;
+  // let ab = 1;
+  // let arr = [];
   if (formData.educationHistory.length === 0) {
     newErrors.educationHistory = "At least one degree is required";
   } else {
@@ -27,7 +37,7 @@ const eduvalidate = (formData) => {
         }
       }
 
-      if (!edu.endDate) {
+      if (!edu.endDate) { 
         eduErr.endDate = "End date is required";
       } else if (edu.startDate && new Date(edu.endDate) <= new Date(edu.startDate)) {
         eduErr.endDate = "End date must be after start date";

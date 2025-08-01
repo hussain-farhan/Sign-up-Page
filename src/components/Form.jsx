@@ -14,7 +14,8 @@ import PersonalInfo from "./PersonalInfo";
 import EmploymentHistory from "./EmploymentHistory";
 import EducationHistory from "./EducationHistory";
 import FamilyMembers from "./FamilyMembers";
-import CriminalHistory from "./CriminalHistory";
+import CriminalHistory from "./CriminalHistory"
+
 
 // Import validation functions
 import validateinfo from "../validation/PersonalValidate";
@@ -23,17 +24,17 @@ import eduvalidate from "../validation/EducationValidate";
 import famvalidate from "../validation/FamilyValidate";
 import crimiValidate from "../validation/CriminalValidate";
 
-
 function Form() {
   const navigate = useNavigate(); 
   const [activeStep, setActiveStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [skippedSteps, setSkippedSteps] = useState(new Set());
   const steps = [
     "Personal Information",
     "Employment History",
     "Education History",
     "Family Members",
-    "Criminal History",
+    "Criminal History"
   ];
 
   const [formData, setFormData] = useState({
@@ -100,8 +101,15 @@ function Form() {
     }
   };
 
+  const handleSkip = () => {
+    setSubmitted(false);
+    setSkippedSteps(prev => new Set([...prev, steps[activeStep]]));
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    setActiveStep((prevActiveStep) => prevActiveStep  - 1);
     setSubmitted(false);
   };
 
@@ -109,13 +117,18 @@ function Form() {
     e.preventDefault();
     setSubmitted(true);
     if (isStepValid(steps[activeStep])) {
-      const allStepsValid = steps.every((label) => isStepValid(label));
+      
+      const stepsToValidate = steps.filter(step => !skippedSteps.has(step));
+      const allStepsValid = stepsToValidate.every((label) => isStepValid(label));
       if (allStepsValid) {
         console.log("Form submitted successfully:", formData);
         navigate("/user-details", { state: { formData } });
       } else {
         console.log("Overall form validation failed. Please review all steps.");
-        const firstInvalidStep = steps.findIndex((label) => !isStepValid(label));
+
+        const firstInvalidStep = steps.findIndex((label) => 
+          !skippedSteps.has(label) && !isStepValid(label)
+        );
         if (firstInvalidStep !== -1) {
           setActiveStep(firstInvalidStep);
         }
@@ -127,6 +140,7 @@ function Form() {
 
   const getStepContent = (step) => {
     switch (step) {
+     
       case "Personal Information":
         return (
           <PersonalInfo
@@ -137,6 +151,7 @@ function Form() {
             submitted={submitted}
           />
         );
+      
       case "Employment History":
         return (
           <EmploymentHistory
@@ -179,8 +194,8 @@ function Form() {
              submitted={submitted}
           />
         );
-      default:
-        return "Unknown step";
+         default:
+          break;
     }
   };
 
@@ -246,11 +261,21 @@ function Form() {
         {getStepContent(steps[activeStep])}
       </Paper>
 
-      {/* Navigation Buttons */}
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
         <Button disabled={activeStep === 0} onClick={handleBack} variant="outlined">
           Back
         </Button>
+        
+        <Box sx={{ ml: "auto", display: "flex", gap: 2 }}>
+          <Button
+          variant="text"
+          onClick={handleSkip}
+          disabled={steps[activeStep] !== "Family Members"}
+          sx={{ textTransform: "none", color: steps[activeStep] === "Family Members" ? "#1976d2" : "gray" }}
+          >
+            Skip
+            </Button>
+            </Box>
 
         <Button
           variant="contained"
@@ -261,6 +286,7 @@ function Form() {
         </Button>
       </Box>
     </Box>
+
   );
 }
 

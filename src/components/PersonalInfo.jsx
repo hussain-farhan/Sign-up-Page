@@ -29,7 +29,7 @@ const PersonalInfo = ({ formData, updateFormData, setParentErrors, submitted }) 
   const handleChange = (e) => {
     const { name, value } = e.target;
     updateFormData(name, value);
-    
+
     if (submitted) {
       const validationErrors = personalValidate({ ...formData, [name]: value });
       setErrors(validationErrors);
@@ -44,7 +44,7 @@ const PersonalInfo = ({ formData, updateFormData, setParentErrors, submitted }) 
       </Typography>
 
       <TextField
-        label="First Name"
+        label="First Name*"
         name="firstname"
         value={formData.firstname}
         onChange={handleChange}
@@ -55,7 +55,7 @@ const PersonalInfo = ({ formData, updateFormData, setParentErrors, submitted }) 
       />
 
       <TextField
-        label="Last Name"
+        label="Last Name*"
         name="lastname"
         value={formData.lastname}
         onChange={handleChange}
@@ -66,7 +66,30 @@ const PersonalInfo = ({ formData, updateFormData, setParentErrors, submitted }) 
       />
 
       <TextField
-        label="Date of Birth"
+        label="Email*"
+        type="email"
+        name="email"
+        value={formData.email} 
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        error={submitted && !!errors.email}
+        helperText={submitted ? errors.email : ''}
+      />
+
+      <TextField
+        label="Phone Number*"
+        name="phoneNumber"
+        value={formData.phoneNumber}
+        onChange={handleChange}
+        fullWidth
+        margin="normal"
+        error={submitted && !!errors.phoneNumber}
+        helperText={submitted ? errors.phoneNumber : ''}
+        />
+
+      <TextField
+        label="Date of Birth*"
         type="date"
         name="dateOfBirth"
         value={formData.dateOfBirth}
@@ -79,7 +102,7 @@ const PersonalInfo = ({ formData, updateFormData, setParentErrors, submitted }) 
       />
 
       <TextField
-        label="Country of Citizenship"
+        label="Country of Citizenship*"
         name="citizenship"
         value={formData.citizenship}
         onChange={handleChange}

@@ -17,6 +17,22 @@ const validateinfo = (formData) => {
     newErrors.lastname = "Last name must be at least 3 characters long";
   }
 
+  if(!formData.email) {
+    newErrors.email = "Email is required";
+  } else if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    newErrors.email = "Email must be a valid format";
+  } else if (formData.email.length < 5 || formData.email.length > 30) {
+    newErrors.email = "Email must be between 5 and 50 characters long";
+  } else if (formData.email.includes(" ")) {
+    newErrors.email = "Email cannot contain spaces";  
+  } 
+
+  if(!formData.phoneNumber) {
+    newErrors.phoneNumber = "Phone number is required";
+  } else if (!formData.phoneNumber.match(/^\d{11}$/)) {
+    newErrors.phoneNumber = "Phone number must be a 11  -digit number";
+  } 
+
   if (!formData.dateOfBirth) {
     newErrors.dateOfBirth = "Date of birth is required";
   } else {

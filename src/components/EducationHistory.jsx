@@ -74,7 +74,7 @@ const EducationHistory = ({ formData, updateFormData, setParentErrors, submitted
       {formData.educationHistory.map((edu, index) => (
         <Paper key={index} sx={{ p: 2, mt: 2 }} elevation={3}>
           <TextField
-            label="Degree"
+            label="Degree*"
             value={edu.degree}
             onChange={(e) =>
               handleEducationChange(index, "degree", e.target.value)
@@ -86,7 +86,7 @@ const EducationHistory = ({ formData, updateFormData, setParentErrors, submitted
           />
 
           <TextField
-            label="Institution"
+            label="Institution*"
             value={edu.institution}
             onChange={(e) =>
               handleEducationChange(index, "institution", e.target.value)

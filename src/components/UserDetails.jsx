@@ -71,6 +71,12 @@ function UserDetails() {
             <ListItemText primary="Name" secondary={`${formData.firstname || 'N/A'} ${formData.lastname || 'N/A'}`} />
           </ListItem>
           <ListItem disableGutters>
+            <ListItemText primary="email" secondary={formData.email|| 'N/A'}  />
+          </ListItem>
+          <ListItem disableGutters>
+          <ListItemText primary="Phone" secondary={formData.phoneNumber || 'N/A'} /> 
+           </ListItem>
+          <ListItem disableGutters>
             <ListItemText primary="Date of Birth" secondary={formatDate(formData.dateOfBirth)} />
           </ListItem>
           <ListItem disableGutters>

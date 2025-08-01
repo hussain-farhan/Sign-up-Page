@@ -28,7 +28,6 @@ const EmploymentHistory = ({ formData, updateFormData, gapExplanations, setGapEx
       setErrors({});
       setParentErrors((prev) => ({ ...prev, employmentHistory: {} }));
     }
-    // eslint-disable-next-line
   }, [formData, gapExplanations, submitted]);
 
   const handleJobChange = (index, field, value) => {

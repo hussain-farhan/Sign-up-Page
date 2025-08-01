@@ -1,38 +1,42 @@
-.App {
-  text-align: center;
-}
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
+  const stepperStyles = {
+    mb: 4,
+    "& .MuiStepLabel-active": {
+      "& .MuiStepLabel-label": {
+        color: "#1976d2",
+      },
+      "& .MuiStepIcon-root": {
+        color: "#1976d2",
+      },
+    },
+    "& .MuiStepLabel-completed": {
+      "& .MuiStepLabel-label": {
+        color: "#555555",
+      },
+      "& .MuiStepIcon-root": {
+        color: "#1976d2",
+      },
+    },
+    "& .MuiStepLabel-label": {
+      color: "#333333",
+    },
+    "& .MuiStepIcon-root": {
+      color: "#b0b0b0",
+    },
+  };
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
+  const paperStyles = {
+    p: 3,
+    mb: 4,
+    borderRadius: 2,
+    bgcolor: "#ffffff",
+    boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.05)",
+  };
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+  const buttonStyles = {
+    bgcolor: "#1976d2",
+    "&:hover": {
+      bgcolor: "#1565c0",
+    },
+    textTransform: "none",
+  };
